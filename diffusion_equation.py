@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import pandas as pd
 
 def solve_diffusion_equation(dx=0.1, dt=0.002, t_max=0.4):
     """
@@ -105,6 +106,34 @@ def plot_results(x, u_history):
     # グラフの表示
     plt.show()
 
+def print_numerical_results(x, u_history):
+    """
+    数値計算結果を表形式で出力する関数
+    
+    Parameters:
+    -----------
+    x : ndarray
+        空間座標
+    u_history : dict
+        各時刻における解
+    """
+    # 結果をDataFrameに変換
+    results = pd.DataFrame(index=x)
+    
+    # 各時刻の解をDataFrameに追加
+    for t, u in sorted(u_history.items()):
+        results[f't = {t}'] = u
+    
+    # 結果を表示
+    print("\n数値計算結果:")
+    print("=" * 80)
+    print(results.round(6))
+    print("=" * 80)
+    
+    # CSVファイルに保存
+    results.to_csv('diffusion_equation_results.csv')
+    print("\n数値結果をCSVファイルに保存しました: diffusion_equation_results.csv")
+
 def main():
     # パラメータの設定
     dx = 0.1
@@ -112,6 +141,9 @@ def main():
     
     # 拡散方程式を解く
     x, u_history = solve_diffusion_equation(dx, dt)
+    
+    # 数値結果を表示
+    print_numerical_results(x, u_history)
     
     # 結果をプロット
     plot_results(x, u_history)
