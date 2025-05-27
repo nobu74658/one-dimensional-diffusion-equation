@@ -76,6 +76,37 @@ def solve_diffusion_equation(dx=0.1, dt=0.002, t_max=0.4):
     
     return x, u_history
 
+def analytical_solution(x, t, n_terms=100):
+    """
+    1次元拡散方程式の解析解を計算する関数
+    
+    Parameters:
+    -----------
+    x : ndarray
+        空間座標
+    t : float
+        時刻
+    n_terms : int
+        フーリエ級数の項数
+    
+    Returns:
+    --------
+    u : ndarray
+        解析解
+    """
+    u = np.zeros_like(x)
+    
+    # 初期条件: u(x, 0) = 2x (x < 0.5), 2(1-x) (x >= 0.5)
+    # フーリエ級数展開を用いて解析解を計算
+    for n in range(1, n_terms + 1):
+        # フーリエ係数の計算
+        bn = 8 / (n * np.pi)**2 * np.sin(n * np.pi / 2)
+        
+        # 各項の計算と加算
+        u += bn * np.sin(n * np.pi * x) * np.exp(-(n * np.pi)**2 * t)
+    
+    return u
+
 def plot_results(x, u_history):
     """
     計算結果をプロットする関数
@@ -87,17 +118,25 @@ def plot_results(x, u_history):
     u_history : dict
         各時刻における解
     """
-    plt.figure(figsize=(10, 6))
+    plt.figure(figsize=(12, 8))
     
     # 各時刻の解をプロット
     for t, u in sorted(u_history.items()):
-        plt.plot(x, u, label=f't = {t}')
+        # 数値解をプロット
+        plt.plot(x, u, 'o-', label=f'数値解 (t = {t})', markersize=4)
+        
+        # 解析解をプロット（t = 0 以外）
+        if t > 0:
+            # より細かい格子で解析解を計算
+            x_fine = np.linspace(0, 1, 100)
+            u_analytical = analytical_solution(x_fine, t)
+            plt.plot(x_fine, u_analytical, '--', label=f'理論解 (t = {t})')
     
     # グラフの設定
-    plt.xlabel('x')
-    plt.ylabel('u(x, t)')
-    plt.title('1次元拡散方程式の数値解')
-    plt.legend()
+    plt.xlabel('x', fontsize=12)
+    plt.ylabel('u(x, t)', fontsize=12)
+    plt.title('1次元拡散方程式の数値解と理論解の比較', fontsize=14)
+    plt.legend(fontsize=10)
     plt.grid(True)
     
     # グラフの保存
@@ -122,17 +161,21 @@ def print_numerical_results(x, u_history):
     
     # 各時刻の解をDataFrameに追加
     for t, u in sorted(u_history.items()):
-        results[f't = {t}'] = u
+        results[f'数値解 (t = {t})'] = u
+        
+        # 解析解も追加（t = 0 以外）
+        if t > 0:
+            results[f'理論解 (t = {t})'] = analytical_solution(x, t)
     
     # 結果を表示
-    print("\n数値計算結果:")
-    print("=" * 80)
+    print("\n数値計算結果と理論解の比較:")
+    print("=" * 100)
     print(results.round(6))
-    print("=" * 80)
+    print("=" * 100)
     
     # CSVファイルに保存
     results.to_csv('diffusion_equation_results.csv')
-    print("\n数値結果をCSVファイルに保存しました: diffusion_equation_results.csv")
+    print("\n数値結果と理論解をCSVファイルに保存しました: diffusion_equation_results.csv")
 
 def main():
     # パラメータの設定
@@ -142,7 +185,7 @@ def main():
     # 拡散方程式を解く
     x, u_history = solve_diffusion_equation(dx, dt)
     
-    # 数値結果を表示
+    # 数値結果と理論解を表示
     print_numerical_results(x, u_history)
     
     # 結果をプロット
