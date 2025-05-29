@@ -123,19 +123,19 @@ def plot_results(x, u_history):
     # 各時刻の解をプロット
     for t, u in sorted(u_history.items()):
         # 数値解をプロット
-        plt.plot(x, u, 'o-', label=f'数値解 (t = {t})', markersize=4)
+        plt.plot(x, u, 'o-', label=f'Numerical Solution (t = {t})', markersize=4)
         
         # 解析解をプロット（t = 0 以外）
         if t > 0:
             # より細かい格子で解析解を計算
             x_fine = np.linspace(0, 1, 100)
             u_analytical = analytical_solution(x_fine, t)
-            plt.plot(x_fine, u_analytical, '--', label=f'理論解 (t = {t})')
+            plt.plot(x_fine, u_analytical, '--', label=f'Analytical Solution (t = {t})')
     
     # グラフの設定
     plt.xlabel('x', fontsize=12)
     plt.ylabel('u(x, t)', fontsize=12)
-    plt.title('1次元拡散方程式の数値解と理論解の比較', fontsize=14)
+    plt.title('Comparison of Numerical and Analytical Solutions for 1D Diffusion Equation', fontsize=14)
     plt.legend(fontsize=10)
     plt.grid(True)
     
